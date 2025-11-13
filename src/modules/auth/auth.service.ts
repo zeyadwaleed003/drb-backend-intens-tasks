@@ -1,17 +1,60 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../users/schemas/user.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { Model } from 'mongoose';
 import { APIResponse } from 'src/common/types/api.types';
 import { TokenService } from '../token/token.service';
+import { LoginDto } from './dto/login.dto';
+import { CookieOptions, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { Env } from 'src/config/env.validation';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    private tokenService: TokenService
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private tokenService: TokenService,
+    private configService: ConfigService<Env, true>
   ) {}
+
+  private parseExpiresInMs(expiresIn: string) {
+    const match = expiresIn.match(/^(\d+)([smhd])$/);
+    if (!match) throw new Error(`Invalid expiresIn format: ${expiresIn}`);
+
+    const value = parseInt(match[1]!, 10);
+    const unit = match[2]!;
+
+    const units: Record<string, number> = {
+      s: 1000,
+      m: 60 * 1000,
+      h: 60 * 60 * 1000,
+      d: 24 * 60 * 60 * 1000,
+    };
+
+    return value * units[unit]!;
+  }
+
+  sendCookie(res: Response, name: string, val: string) {
+    const options: CookieOptions = {
+      httpOnly: true,
+      path: '/',
+      sameSite: 'strict',
+      secure: this.configService.get<string>('NODE_ENV') === 'production', // In production cookie will be sent only via HTTPs - encrypted
+      maxAge: 7 * 24 * 60 * 60 * 100, // default max age of 7 days
+    };
+
+    if (name === 'refreshToken')
+      options.maxAge = this.parseExpiresInMs(
+        this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN')!
+      );
+
+    res.cookie(name, val, options);
+  }
 
   async register(registerDto: RegisterDto): Promise<APIResponse> {
     const exist = await this.userModel.exists({ email: registerDto.email });
@@ -24,6 +67,26 @@ export class AuthService {
     const accessToken = await this.tokenService.generateAccessToken(user);
     return {
       data: user,
+      accessToken,
+    };
+  }
+
+  async login(loginDto: LoginDto): Promise<APIResponse> {
+    const userDoc = await this.userModel.findOne({ email: loginDto.email });
+
+    if (!userDoc || !(await userDoc.comparePassword(loginDto.password)))
+      throw new UnauthorizedException('Invalid email or password');
+
+    const user = userDoc.toJSON();
+
+    const accessToken = await this.tokenService.generateAccessToken(user);
+    const refreshToken = await this.tokenService.generateRefreshToken({
+      _id: user._id as unknown as string,
+    });
+
+    return {
+      data: user,
+      refreshToken,
       accessToken,
     };
   }

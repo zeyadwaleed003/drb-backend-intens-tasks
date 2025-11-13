@@ -1,6 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Role } from '../user.enums';
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
+import { HydratedDocument } from 'mongoose';
+
+type UserMethods = {
+  comparePassword(password: string): Promise<boolean>;
+};
+
+export type UserDocument = HydratedDocument<User, UserMethods>;
 
 @Schema({ timestamps: true })
 export class User {
@@ -22,7 +29,6 @@ export class User {
       message:
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
     },
-    select: false,
   })
   password: string;
 
@@ -37,7 +43,7 @@ export class User {
   })
   role: Role;
 
-  @Prop({ select: false })
+  @Prop()
   refreshToken?: string;
 }
 
@@ -51,6 +57,10 @@ UserSchema.pre('save', async function (next) {
 
   next();
 });
+
+UserSchema.methods.comparePassword = async function (password: string) {
+  return await compare(password, this.password);
+};
 
 UserSchema.methods.toJSON = function () {
   const obj = this.toObject();
