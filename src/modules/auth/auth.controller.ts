@@ -73,4 +73,12 @@ export class AuthController {
     res.clearCookie('refreshToken');
     return result;
   }
+
+  @UseGuards(AuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
+    res.clearCookie('refreshToken');
+    return await this.authService.logout(req.user!);
+  }
 }

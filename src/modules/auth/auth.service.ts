@@ -138,4 +138,13 @@ export class AuthService {
       message: 'Password Changed Successfully',
     };
   }
+
+  async logout(user: UserDocument): Promise<APIResponse> {
+    user.refreshToken = undefined;
+    await user.save();
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
 }
