@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateVehicleDto } from './dto/create-vehicles.dto';
 import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -9,10 +17,12 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import type { QueryString } from 'src/common/types/api.types';
+import { IdDto } from 'src/common/dto/id.dto';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -78,5 +88,23 @@ export class VehiclesController {
   })
   async find(@Query() q: QueryString) {
     return await this.vehiclesService.find(q);
+  }
+
+  @Get('/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get vehicle by ID',
+    description:
+      'Retrieve a specific vehicle by its ID with populated driver information. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async findById(@Param() dto: IdDto) {
+    return await this.vehiclesService.findById(dto.id);
   }
 }

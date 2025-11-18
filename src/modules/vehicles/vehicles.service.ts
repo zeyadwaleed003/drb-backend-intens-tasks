@@ -6,7 +6,7 @@ import {
 import { CreateVehicleDto } from './dto/create-vehicles.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Vehicle, VehicleDocument } from './schemas/vehicle.schema';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, ObjectId } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { APIResponse, QueryString } from 'src/common/types/api.types';
 import ApiFeatures from 'src/common/utils/ApiFeatures';
@@ -62,6 +62,15 @@ export class VehiclesService {
     return {
       size: vehicles.length,
       data: vehicles,
+    };
+  }
+
+  async findById(id: ObjectId): Promise<APIResponse> {
+    const vehicle = await this.vehicleModel.findById(id).populate('driver');
+    if (!vehicle) throw new NotFoundException('No vehicle found with that id');
+
+    return {
+      data: vehicle,
     };
   }
 }

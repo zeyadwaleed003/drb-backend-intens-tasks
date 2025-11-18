@@ -4,7 +4,11 @@ import { VehicleType } from '../vehicles.enums';
 
 export type VehicleDocument = HydratedDocument<Vehicle>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class Vehicle {
   @Prop({
     required: [true, 'A vehicle must have a plate number'],
@@ -40,3 +44,10 @@ export class Vehicle {
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);
+
+VehicleSchema.virtual('driver', {
+  ref: 'User',
+  localField: 'driverId',
+  foreignField: '_id',
+  justOne: true, // Don't return an array ... only a single object
+});
