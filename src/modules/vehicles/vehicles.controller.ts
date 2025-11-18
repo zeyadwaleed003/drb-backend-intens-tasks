@@ -114,13 +114,12 @@ export class VehiclesController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.FM)
+  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Update vehicle by ID',
     description:
-      'Update a specific vehicle by its ID. **Requires authentication and ADMIN or FLEET_MANAGER role.**',
+      'Update a specific vehicle by its ID. **Requires authentication**',
   })
   @ApiParam({
     name: 'id',
