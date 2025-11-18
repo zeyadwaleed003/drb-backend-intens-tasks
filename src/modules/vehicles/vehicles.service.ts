@@ -12,6 +12,7 @@ import { APIResponse, QueryString } from 'src/common/types/api.types';
 import ApiFeatures from 'src/common/utils/ApiFeatures';
 import { VehicleStatus } from './vehicles.enums';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { AssignDriverDto } from './dto/assign-driver.dto';
 
 @Injectable()
 export class VehiclesService {
@@ -109,6 +110,53 @@ export class VehiclesService {
 
     return {
       message: 'Vehicle deleted successfully',
+    };
+  }
+
+  async assignDriverToVehicle(
+    vehicleId: ObjectId,
+    dto: AssignDriverDto
+  ): Promise<APIResponse> {
+    // Check if the driver existed
+    if (!(await this.userModel.exists({ _id: dto.driverId })))
+      throw new NotFoundException(`Driver with ID ${dto.driverId} not found`);
+
+    // Check if the driver is already assigned to another vehicle
+    if (await this.vehicleModel.exists({ driverId: dto.driverId }))
+      throw new ConflictException(
+        `Driver with ID ${dto.driverId} is already assigned to another vehicle`
+      );
+
+    const vehicle = await this.vehicleModel
+      .findByIdAndUpdate(vehicleId, dto, { new: true, runValidators: true })
+      .lean();
+
+    // Check if no vehicle with the provided vehicle id
+    if (!vehicle) throw new NotFoundException('No vehicle found with that id');
+
+    return {
+      data: vehicle,
+    };
+  }
+
+  async unassignDriverFromVehicle(vehicleId: ObjectId): Promise<APIResponse> {
+    const vehicle = await this.vehicleModel.findById(vehicleId);
+
+    // Check if vehicle existed
+    if (!vehicle) throw new NotFoundException('No vehicle found with that id');
+
+    // Check if no driver assigned to that vehicle
+    if (!vehicle.driverId)
+      throw new ConflictException(
+        'No driver is currently assigned to this vehicle'
+      );
+
+    // Unassigned = update the driver id to be null
+    vehicle.driverId = null;
+    await vehicle.save();
+
+    return {
+      data: vehicle,
     };
   }
 }

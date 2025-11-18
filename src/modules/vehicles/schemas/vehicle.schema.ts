@@ -40,7 +40,7 @@ export class Vehicle {
   deviceId: string; // GPS device
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  driverId: MongooseSchema.Types.ObjectId;
+  driverId: MongooseSchema.Types.ObjectId | null;
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);

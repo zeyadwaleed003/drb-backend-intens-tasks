@@ -28,6 +28,7 @@ import {
 import type { QueryString } from 'src/common/types/api.types';
 import { IdDto } from 'src/common/dto/id.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { AssignDriverDto } from './dto/assign-driver.dto';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -153,5 +154,48 @@ export class VehiclesController {
   })
   async delete(@Param() dto: IdDto) {
     return await this.vehiclesService.delete(dto.id);
+  }
+
+  @Patch('/:id/assign-driver')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Assign driver to vehicle',
+    description:
+      'Assign a driver to a specific vehicle by vehicle ID. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: AssignDriverDto })
+  async assignVehicleToDriver(
+    @Param() idDto: IdDto,
+    @Body() assignDriverDto: AssignDriverDto
+  ) {
+    return await this.vehiclesService.assignDriverToVehicle(
+      idDto.id,
+      assignDriverDto
+    );
+  }
+
+  @Patch('/:id/unassign-driver')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Unassign driver from vehicle',
+    description:
+      'Remove the driver assignment from a specific vehicle by vehicle ID. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async unassignDriverFromVehicle(@Param() idDto: IdDto) {
+    return await this.vehiclesService.unassignDriverFromVehicle(idDto.id);
   }
 }
