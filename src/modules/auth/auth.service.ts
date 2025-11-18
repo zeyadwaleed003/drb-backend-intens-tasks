@@ -16,13 +16,24 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.validation';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService {
+  private readonly TRANSLATION_KEYS = {
+    EMAIL_EXISTS: 'exceptions.EMAIL_EXISTS',
+    INVALID_CREDENTIALS: 'exceptions.INVALID_CREDENTIALS',
+    CURRENT_PASSWORD_INCORRECT: 'exceptions.CURRENT_PASSWORD_INCORRECT',
+    PASSWORD_SAME_AS_CURRENT: 'exceptions.PASSWORD_SAME_AS_CURRENT',
+    PASSWORD_CHANGED: 'messages.PASSWORD_CHANGED',
+    LOGGED_OUT: 'messages.LOGGED_OUT',
+  };
+
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private tokenService: TokenService,
-    private configService: ConfigService<Env, true>
+    private configService: ConfigService<Env, true>,
+    private readonly i18n: I18nService
   ) {}
 
   // This function is responsible for parsing tokens expiration dates into ms. Ex: 15m -> 15 * 60 * 1000ms
@@ -65,7 +76,9 @@ export class AuthService {
     // Check if a user already exists with this email
     const exist = await this.userModel.exists({ email: registerDto.email });
     if (exist)
-      throw new ConflictException('An account with this email already exists');
+      throw new ConflictException(
+        this.i18n.t(this.TRANSLATION_KEYS.EMAIL_EXISTS)
+      );
 
     const userDoc = await this.userModel.create(registerDto);
 
@@ -84,7 +97,9 @@ export class AuthService {
 
     // If no user with this email or the given password is not correct ... return an error
     if (!userDoc || !(await userDoc.comparePassword(loginDto.password)))
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException(
+        this.i18n.t(this.TRANSLATION_KEYS.INVALID_CREDENTIALS)
+      );
 
     // sanitize
     const user = userDoc.toJSON();
@@ -132,12 +147,14 @@ export class AuthService {
   ): Promise<APIResponse> {
     // Check if the given password is correct
     if (!(await user.comparePassword(changePasswordDto.currentPassword)))
-      throw new UnauthorizedException('Current password is incorrect');
+      throw new UnauthorizedException(
+        this.i18n.t(this.TRANSLATION_KEYS.CURRENT_PASSWORD_INCORRECT)
+      );
 
     // User must not enter the same password as the old one ... this line of code could also implemented using custom decorator in the dto
     if (changePasswordDto.newPassword === changePasswordDto.currentPassword)
       throw new BadRequestException(
-        'New password must be different from the current password'
+        this.i18n.t(this.TRANSLATION_KEYS.PASSWORD_SAME_AS_CURRENT)
       );
 
     // Update using the save method to run the pre save hooks (I need them)
@@ -146,7 +163,7 @@ export class AuthService {
     await user.save();
 
     return {
-      message: 'Password Changed Successfully',
+      message: this.i18n.t(this.TRANSLATION_KEYS.PASSWORD_CHANGED),
     };
   }
 
@@ -156,7 +173,7 @@ export class AuthService {
     await user.save();
 
     return {
-      message: 'Logged out successfully',
+      message: this.i18n.t(this.TRANSLATION_KEYS.LOGGED_OUT),
     };
   }
 

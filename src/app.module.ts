@@ -1,10 +1,12 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Env, env } from './config/env.validation';
-import { HealthModule } from './modules/health/health.module';
-import { MongooseModule } from '@nestjs/mongoose';
+import * as path from 'path';
 import { Connection } from 'mongoose';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Env, env } from './config/env.validation';
 import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 
 @Module({
@@ -31,6 +33,17 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
           },
         };
       },
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+      ],
     }),
     HealthModule,
     AuthModule,

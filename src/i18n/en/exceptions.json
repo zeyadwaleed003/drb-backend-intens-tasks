@@ -1,0 +1,13 @@
+{
+  "PLATE_NUMBER_EXISTS": "Vehicle with plate number {plateNumber} already exists",
+  "DRIVER_NOT_FOUND": "Driver with ID {driverId} not found",
+  "VEHICLE_NOT_FOUND": "No vehicle found with that id",
+  "DRIVER_ALREADY_ASSIGNED": "Driver with ID {driverId} is already assigned to another vehicle",
+  "VEHICLE_NOT_ASSIGNED": "No driver is currently assigned to this vehicle",
+  "ACCESS_TOKEN_INVALID": "Access token is invalid or expired",
+  "REFRESH_TOKEN_INVALID": "Refresh token is invalid or expired",
+  "EMAIL_EXISTS": "An account with this email already exists",
+  "INVALID_CREDENTIALS": "Invalid email or password",
+  "CURRENT_PASSWORD_INCORRECT": "Current password is incorrect",
+  "PASSWORD_SAME_AS_CURRENT": "New password must be different from the current password"
+}

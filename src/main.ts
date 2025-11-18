@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
+import { RequestMethod, VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { I18nValidationPipe } from 'nestjs-i18n';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,7 +21,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(
-    new ValidationPipe({
+    new I18nValidationPipe({
       transform: true,
       whitelist: true, // Strip properties that don't have decorators
       forbidNonWhitelisted: true, // Throw an exception if non-whitelisted properties, can't work without the *whitelist* option is set to true

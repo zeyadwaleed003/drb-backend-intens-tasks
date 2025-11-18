@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { I18nService } from 'nestjs-i18n';
 import { Env } from 'src/config/env.validation';
 import { RefreshTokenPayload } from './token.types';
 import { User, UserDocument } from '../users/schemas/user.schema';
@@ -13,8 +14,14 @@ export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Env, true>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly i18n: I18nService
   ) {}
+
+  private I18N = {
+    ACCESS_TOKEN_INVALID: 'exceptions.ACCESS_TOKEN_INVALID',
+    REFRESH_TOKEN_INVALID: 'exceptions.REFRESH_TOKEN_INVALID',
+  };
 
   private hashToken(token: string) {
     return createHash('sha256').update(token).digest('hex');
@@ -77,7 +84,9 @@ export class TokenService {
         this.configService.get<string>('ACCESS_TOKEN_SECRET')
       );
     } catch {
-      throw new UnauthorizedException('Access token is invalid or expired');
+      throw new UnauthorizedException(
+        this.i18n.t(this.I18N.ACCESS_TOKEN_INVALID)
+      );
     }
   }
 
@@ -101,11 +110,15 @@ export class TokenService {
 
       const isValid = this.compareHashedToken(token, userRefreshToken);
       if (!isValid)
-        throw new UnauthorizedException('Refresh token is invalid or expired');
+        throw new UnauthorizedException(
+          this.i18n.t(this.I18N.REFRESH_TOKEN_INVALID)
+        );
 
       return verifiedRefreshToken;
     } catch {
-      throw new UnauthorizedException('Refresh token is invalid or expired');
+      throw new UnauthorizedException(
+        this.i18n.t(this.I18N.REFRESH_TOKEN_INVALID)
+      );
     }
   }
 }
