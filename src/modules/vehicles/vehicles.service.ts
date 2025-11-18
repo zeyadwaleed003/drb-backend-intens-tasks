@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateVehicleDto } from './dto/create-vehicles.dto';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Vehicle, VehicleDocument } from './schemas/vehicle.schema';
 import { FilterQuery, Model, ObjectId } from 'mongoose';
@@ -11,6 +11,7 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 import { APIResponse, QueryString } from 'src/common/types/api.types';
 import ApiFeatures from 'src/common/utils/ApiFeatures';
 import { VehicleStatus } from './vehicles.enums';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @Injectable()
 export class VehiclesService {
@@ -67,6 +68,35 @@ export class VehiclesService {
 
   async findById(id: ObjectId): Promise<APIResponse> {
     const vehicle = await this.vehicleModel.findById(id).populate('driver');
+    if (!vehicle) throw new NotFoundException('No vehicle found with that id');
+
+    return {
+      data: vehicle,
+    };
+  }
+
+  async update(
+    id: ObjectId,
+    updateVehicleDto: UpdateVehicleDto
+  ): Promise<APIResponse> {
+    // If driver id was provided ... need to check if the driver existed
+    if (
+      updateVehicleDto.driverId &&
+      !(await this.userModel.exists({ _id: updateVehicleDto.driverId }))
+    )
+      throw new NotFoundException(
+        `Driver with ID ${updateVehicleDto.driverId} not found`
+      );
+
+    const vehicle = await this.vehicleModel.findByIdAndUpdate(
+      id,
+      updateVehicleDto,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    // Need to make sure the provided vehicle id is correct
     if (!vehicle) throw new NotFoundException('No vehicle found with that id');
 
     return {

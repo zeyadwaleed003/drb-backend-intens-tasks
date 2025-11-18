@@ -3,11 +3,12 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateVehicleDto } from './dto/create-vehicles.dto';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -23,6 +24,7 @@ import {
 } from '@nestjs/swagger';
 import type { QueryString } from 'src/common/types/api.types';
 import { IdDto } from 'src/common/dto/id.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -106,5 +108,28 @@ export class VehiclesController {
   })
   async findById(@Param() dto: IdDto) {
     return await this.vehiclesService.findById(dto.id);
+  }
+
+  @Patch('/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.FM)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update vehicle by ID',
+    description:
+      'Update a specific vehicle by its ID. **Requires authentication and ADMIN or FLEET_MANAGER role.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateVehicleDto })
+  async update(
+    @Body() updateVehicleDto: UpdateVehicleDto,
+    @Param() dto: IdDto
+  ) {
+    return await this.vehiclesService.update(dto.id, updateVehicleDto);
   }
 }
