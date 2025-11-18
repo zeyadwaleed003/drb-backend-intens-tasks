@@ -7,7 +7,9 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main",
+    "seed": "ts-node src/database/seeders/seed.ts seed",
+    "seed:drop": "ts-node src/database/seeders/seed.ts drop"
   },
   "repository": {
     "type": "git",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
     "@types/bcrypt": "^6.0.0",
-    "@types/cookie-parser": "^1.4.10"
+    "@types/cookie-parser": "^1.4.10",
+    "ts-node": "^10.9.2"
   }
 }

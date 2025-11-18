@@ -21,7 +21,7 @@ export class Vehicle {
 
   @Prop({
     min: [1900, 'Year must be 1900 or later'],
-    max: [new Date().getFullYear() + 2, 'Year cannot be in the future'],
+    max: [new Date().getFullYear() + 1, 'Year cannot be in the future'],
     required: [true, 'A vehicle must have a year'],
   })
   year: number;
