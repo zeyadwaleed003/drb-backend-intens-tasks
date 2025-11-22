@@ -1,18 +1,68 @@
 # DRB Backend Internship Tasks
 
-Welcome to the DRB Backend Internship program! This repository contains weekly tasks designed to enhance your backend development skills.
+A NestJS-based API using NestJS, TypeScript, and MongoDB with JWT-based authentication.
 
-## How to Get Started
+## Setup Instructions
 
-1. **Fork this repository** to your GitHub account
-2. **Clone your forked repository** to your local machine
-3. **Create a branch** named `week-X` (where X is the week number)
-4. **Complete the task** on your branch
-5. **Push your changes** to your forked repository
-6. **Create a Pull Request** back to the main repository when ready for review
+### 1. Clone the Repository
 
-## Questions?
+```bash
+git clone <repository-url>
+cd drb-backend-intens-tasks
+```
 
-If you have any questions or need clarification, please reach out to me on WhatsApp.
+### 2. Environment Configuration
 
-Good luck! 🚀
+Create a `.env` file in the root directory based on the `.env.example` template provided in the repository.
+
+### 3. Installation & Running
+
+#### Option A: Using Docker (Recommended)
+
+**Development Mode:**
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+**Production Mode:**
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+**Stop Services:**
+
+```bash
+docker-compose down
+
+# Remove volumes as well
+docker-compose down -v
+```
+
+#### Option B: Local Setup
+
+**Install Dependencies:**
+
+```bash
+npm install
+```
+
+**Run the Application:**
+
+```bash
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run build
+npm run start:prod
+```
+
+## Accessing the Application
+
+Assuming PORT=3000
+
+- **API:** http://localhost:3000
+- **Swagger Documentation:** http://localhost:3000/docs
+- **Mongo Express (DB UI):** http://localhost:8081

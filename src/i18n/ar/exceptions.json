@@ -1,0 +1,13 @@
+{
+  "PLATE_NUMBER_EXISTS": "موجودة بالفعل {plateNumber} المركبة برقم لوحة",
+  "DRIVER_NOT_FOUND": "غير موجود {driverId} السائق برقم التعريف",
+  "VEHICLE_NOT_FOUND": "لم يتم العثور على مركبة بهذا المعرف",
+  "DRIVER_ALREADY_ASSIGNED": "مسند بالفعل لمركبة أخرى {driverId} السائق برقم التعريف",
+  "VEHICLE_NOT_ASSIGNED": "لا يوجد سائق مسند حالياً لهذه المركبة",
+  "ACCESS_TOKEN_INVALID": "رمز الوصول غير صالح أو منتهي الصلاحية",
+  "REFRESH_TOKEN_INVALID": "رمز التحديث غير صالح أو منتهي الصلاحية",
+  "EMAIL_EXISTS": "يوجد حساب بالفعل بهذا البريد الإلكتروني",
+  "INVALID_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  "CURRENT_PASSWORD_INCORRECT": "كلمة المرور الحالية غير صحيحة",
+  "PASSWORD_SAME_AS_CURRENT": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور الحالية"
+}

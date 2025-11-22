@@ -1,0 +1,201 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { VehiclesService } from './vehicles.service';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../users/user.enums';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import type { QueryString } from 'src/common/types/api.types';
+import { IdDto } from 'src/common/dto/id.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { AssignDriverDto } from './dto/assign-driver.dto';
+
+@ApiTags('Vehicles')
+@Controller('vehicles')
+export class VehiclesController {
+  constructor(private vehiclesService: VehiclesService) {}
+
+  @Post('/')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.FM)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a new vehicle',
+    description:
+      'Create a new vehicle in the system. **Requires authentication and ADMIN or FLEET_MANAGER role.**',
+  })
+  @ApiBody({ type: CreateVehicleDto })
+  async create(@Body() createVehicleDto: CreateVehicleDto) {
+    return await this.vehiclesService.create(createVehicleDto);
+  }
+
+  @Get('/')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get all vehicles',
+    description:
+      'Retrieve a list of all vehicles with optional filtering, sorting, pagination, and field selection. **Requires authentication.**',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    type: String,
+    description: 'Sort by field (prefix with - for descending)',
+    example: '-year,manufacturer',
+  })
+  @ApiQuery({
+    name: 'fields',
+    required: false,
+    type: String,
+    description: 'Comma-separated list of fields to include',
+    example: 'plateNumber,model,manufacturer,year',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['assigned', 'unassigned'],
+    description: 'Filter by assignment status',
+    example: 'assigned',
+  })
+  async find(@Query() q: QueryString) {
+    return await this.vehiclesService.find(q);
+  }
+
+  @Get('/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get vehicle by ID',
+    description:
+      'Retrieve a specific vehicle by its ID with populated driver information. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async findById(@Param() dto: IdDto) {
+    return await this.vehiclesService.findById(dto.id);
+  }
+
+  @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update vehicle by ID',
+    description:
+      'Update a specific vehicle by its ID. **Requires authentication**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateVehicleDto })
+  async update(
+    @Body() updateVehicleDto: UpdateVehicleDto,
+    @Param() dto: IdDto
+  ) {
+    return await this.vehiclesService.update(dto.id, updateVehicleDto);
+  }
+
+  @Delete('/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete vehicle by ID',
+    description:
+      'Delete a specific vehicle by its ID. **Requires authentication and ADMIN role.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async delete(@Param() dto: IdDto) {
+    return await this.vehiclesService.delete(dto.id);
+  }
+
+  @Patch('/:id/assign-driver')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Assign driver to vehicle',
+    description:
+      'Assign a driver to a specific vehicle by vehicle ID. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: AssignDriverDto })
+  async assignVehicleToDriver(
+    @Param() idDto: IdDto,
+    @Body() assignDriverDto: AssignDriverDto
+  ) {
+    return await this.vehiclesService.assignDriverToVehicle(
+      idDto.id,
+      assignDriverDto
+    );
+  }
+
+  @Patch('/:id/unassign-driver')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Unassign driver from vehicle',
+    description:
+      'Remove the driver assignment from a specific vehicle by vehicle ID. **Requires authentication.**',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Vehicle ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async unassignDriverFromVehicle(@Param() idDto: IdDto) {
+    return await this.vehiclesService.unassignDriverFromVehicle(idDto.id);
+  }
+}

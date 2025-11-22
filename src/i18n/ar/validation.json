@@ -1,0 +1,12 @@
+{
+  "IS_STRING": "يجب أن يكون نصاً {property}",
+  "IS_NUMBER": "يجب أن يكون رقماً {property}",
+  "NOT_EMPTY": "لا يمكن أن يكون فارغاً {property}",
+  "MIN_YEAR": "أو أحدث {property} السنة يجب أن تكون",
+  "MAX_YEAR": "السنة لا يمكن أن تكون في المستقبل",
+  "IS_ENUM": "غير صالح {property} نوع",
+  "IS_MONGODB_ID": "{property} يجب أن يكون معرف MongoDB صالح",
+  "MIN_LENGTH": "{property} يجب أن يكون {constraint1} حرفاً على الأقل",
+  "PASSWORD_COMPLEXITY": "{property} يجب أن تحتوي على حرف كبير واحد على الأقل، حرف صغير، رقم، وحرف خاص",
+  "IS_EMAIL": "{property} يجب أن يكون عنوان بريد إلكتروني صالح"
+}

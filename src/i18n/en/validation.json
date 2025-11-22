@@ -1,0 +1,12 @@
+{
+  "IS_STRING": "{property} must be a string",
+  "IS_NUMBER": "{property} must be a number",
+  "NOT_EMPTY": "{property} cannot be empty",
+  "MIN_YEAR": "year must be {property} or later",
+  "MAX_YEAR": "year cannot be in the future",
+  "IS_ENUM": "Invalid {property} type",
+  "IS_MONGODB_ID": "{property} must be a valid MongoDB ObjectId",
+  "MIN_LENGTH": "{property} must be at least $constraint1 characters long",
+  "PASSWORD_COMPLEXITY": "{property} must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+  "IS_EMAIL": "{property} must be a valid email address"
+}
